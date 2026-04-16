@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Lock, Mail, User, Phone, MapPin, FileText } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, User, Phone, MapPin, FileText, AlertCircle, Calendar } from 'lucide-react'
+import { GoogleLogin } from '@react-oauth/google'
+import { authAPI, googleAuthAPI } from '../services/api'
 
 export default function Register() {
   const navigate = useNavigate()
@@ -10,6 +12,7 @@ export default function Register() {
     lastName: '',
     email: '',
     phone: '',
+    dateNaissance: '',
     cin: '',
     address: '',
     password: '',
@@ -18,6 +21,9 @@ export default function Register() {
   })
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState(false)
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target
@@ -35,13 +41,56 @@ export default function Register() {
     if (step > 1) setStep(step - 1)
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setError('')
+    
     if (formData.password !== formData.confirmPassword) {
-      alert('Les mots de passe ne correspondent pas')
+      setError('Les mots de passe ne correspondent pas')
       return
     }
-    navigate('/login')
+    
+    if (formData.password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères')
+      return
+    }
+    
+    setLoading(true)
+    
+    try {
+      const response = await authAPI.register({
+        email: formData.email,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        dateNaissance: formData.dateNaissance,
+        cin: formData.cin,
+        address: formData.address,
+        password: formData.password,
+      })
+      
+      setSuccess(true)
+      // Redirection vers la page de vérification d'email
+      setTimeout(() => {
+        navigate(`/verify-email?email=${encodeURIComponent(formData.email)}`)
+      }, 3000)
+    } catch (err) {
+      setError(err.message || 'Erreur lors de l\'inscription')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleGoogleRegister = async (credentialResponse) => {
+    try {
+      const response = await googleAuthAPI.googleLogin(credentialResponse.credential)
+      if (response.user.role === 'citoyen') {
+        navigate('/citizen')
+      } else {
+        navigate('/admin')
+      }
+    } catch (err) {
+      setError(err.message || 'Erreur de connexion Google')
+    }
   }
 
   return (
@@ -76,6 +125,33 @@ export default function Register() {
           ))}
         </div>
 
+        {/* Google Sign Up - Step 1 only */}
+        {step === 1 && (
+          <div className="bg-white rounded-xl shadow-lg p-8 mb-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4 text-center">Inscription rapide</h3>
+            <div className="flex justify-center">
+              <GoogleLogin
+                onSuccess={handleGoogleRegister}
+                onError={() => console.log('Register Failed')}
+                text="signup_with"
+                shape="rectangular"
+                theme="outline"
+                size="large"
+                width="350"
+              />
+            </div>
+
+            <div className="relative mt-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">ou inscrivez-vous manuellement</span>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Step titles */}
         <div className="text-center mb-6">
           {step === 1 && <h2 className="text-xl font-bold text-gray-900">Informations personnelles</h2>}
@@ -85,6 +161,22 @@ export default function Register() {
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-lg p-8">
+          {/* Error Message */}
+          {error && (
+            <div className="p-3 mb-6 bg-red-50 border border-red-200 rounded-lg flex items-start gap-2 text-red-800">
+              <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+              <p className="text-sm">{error}</p>
+            </div>
+          )}
+
+          {/* Success Message */}
+          {success && (
+            <div className="p-3 mb-6 bg-green-50 border border-green-200 rounded-lg text-green-800">
+              <p className="text-sm font-medium">Inscription réussie !</p>
+              <p className="text-sm mt-1">Un email de confirmation a été envoyé. Vérifiez votre boîte de réception.</p>
+            </div>
+          )}
+
           {/* Step 1: Personal Info */}
           {step === 1 && (
             <div className="space-y-6">
@@ -122,7 +214,21 @@ export default function Register() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Numéro CIN</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Date de naissance <span className="text-gray-400 text-xs">(optionnel)</span></label>
+                <div className="relative">
+                  <Calendar className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
+                  <input
+                    type="date"
+                    name="dateNaissance"
+                    value={formData.dateNaissance}
+                    onChange={handleChange}
+                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Numéro CIN <span className="text-gray-400 text-xs">(optionnel - si vous êtes mineur)</span></label>
                 <div className="relative">
                   <FileText className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
                   <input
@@ -132,7 +238,6 @@ export default function Register() {
                     onChange={handleChange}
                     placeholder="101123456789"
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                    required
                   />
                 </div>
               </div>
@@ -148,7 +253,6 @@ export default function Register() {
                     onChange={handleChange}
                     placeholder="123 Rue de la Paix, Antananarivo"
                     className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-600"
-                    required
                   />
                 </div>
               </div>
@@ -246,9 +350,9 @@ export default function Register() {
                 <div className="space-y-2 text-sm">
                   <p><span className="text-gray-600">Nom:</span> <span className="font-medium">{formData.firstName} {formData.lastName}</span></p>
                   <p><span className="text-gray-600">E-mail:</span> <span className="font-medium">{formData.email}</span></p>
-                  <p><span className="text-gray-600">Téléphone:</span> <span className="font-medium">{formData.phone}</span></p>
-                  <p><span className="text-gray-600">CIN:</span> <span className="font-medium">{formData.cin}</span></p>
-                  <p><span className="text-gray-600">Adresse:</span> <span className="font-medium">{formData.address}</span></p>
+                  <p><span className="text-gray-600">Date de naissance:</span> <span className="font-medium">{formData.dateNaissance || 'Non renseignée'}</span></p>
+                  <p><span className="text-gray-600">CIN:</span> <span className="font-medium">{formData.cin || 'Non renseigné'}</span></p>
+                  <p><span className="text-gray-600">Adresse:</span> <span className="font-medium">{formData.address || 'Non renseignée'}</span></p>
                 </div>
               </div>
 
@@ -283,16 +387,18 @@ export default function Register() {
               <button
                 type="button"
                 onClick={handleNext}
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 rounded-lg transition-colors duration-200"
+                disabled={loading || success}
+                className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-medium py-2 rounded-lg transition-colors duration-200"
               >
                 Suivant
               </button>
             ) : (
               <button
                 type="submit"
-                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 rounded-lg transition-colors duration-200"
+                disabled={loading || success}
+                className="flex-1 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-medium py-2 rounded-lg transition-colors duration-200"
               >
-                Créer le compte
+                {loading ? 'Création...' : success ? 'Compte créé !' : 'Créer le compte'}
               </button>
             )}
           </div>

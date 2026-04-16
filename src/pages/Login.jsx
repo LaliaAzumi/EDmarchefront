@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
+import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react'
+import { GoogleLogin } from '@react-oauth/google'
+import { authAPI, googleAuthAPI } from '../services/api'
 
 export default function Login() {
   const navigate = useNavigate()
@@ -8,14 +10,60 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [userType, setUserType] = useState('citizen')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [emailNotVerified, setEmailNotVerified] = useState(false)
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault()
-    // Mock login - in real app would authenticate
-    if (userType === 'citizen') {
-      navigate('/citizen')
-    } else {
-      navigate('/admin')
+    setLoading(true)
+    setError('')
+    setEmailNotVerified(false)
+    
+    try {
+      const response = await authAPI.login(email, password)
+      
+      if (userType === 'citizen' || response.user.role === 'citoyen') {
+        navigate('/citizen')
+      } else {
+        navigate('/admin')
+      }
+    } catch (err) {
+      setError(err.message || 'Erreur de connexion')
+      
+      // Vérifier si l'erreur est liée à l'email non vérifié
+      if (err.message?.includes('Email non confirmé') || err.message?.includes('non confirmé') || err.message?.includes('non vérifié')) {
+        setEmailNotVerified(true)
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    try {
+      await authAPI.resendVerificationEmail(email)
+      setError('Un nouvel email de confirmation a été envoyé.')
+      setEmailNotVerified(false)
+    } catch (err) {
+      setError('Erreur lors de l\'envoi de l\'email.')
+    }
+  }
+
+  const handleGoToVerifyPage = () => {
+    navigate(`/verify-email?email=${encodeURIComponent(email)}`)
+  }
+
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      const response = await googleAuthAPI.googleLogin(credentialResponse.credential)
+      if (response.user.role === 'citoyen') {
+        navigate('/citizen')
+      } else {
+        navigate('/admin')
+      }
+    } catch (err) {
+      setError(err.message || 'Erreur de connexion Google')
     }
   }
 
@@ -36,6 +84,34 @@ export default function Login() {
 
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-6">
+              {/* Error Message */}
+              {error && (
+                <div className={`p-3 rounded-lg flex items-start gap-2 ${emailNotVerified ? 'bg-yellow-50 border border-yellow-200 text-yellow-800' : 'bg-red-50 border border-red-200 text-red-800'}`}>
+                  <AlertCircle className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm">{error}</p>
+                    {emailNotVerified && (
+                      <div className="mt-2 space-y-2">
+                        <button
+                          type="button"
+                          onClick={handleGoToVerifyPage}
+                          className="text-sm text-teal-600 hover:text-teal-700 font-medium underline"
+                        >
+                          Aller à la page de vérification
+                        </button>
+                        <button
+                          type="button"
+                          onClick={handleResendVerification}
+                          className="text-sm text-teal-600 hover:text-teal-700 font-medium underline ml-3"
+                        >
+                          Renvoyer l'email
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* User Type Selection */}
               <div className="space-y-3">
                 <label className="block text-sm font-medium text-gray-700">Type de compte</label>
@@ -118,10 +194,39 @@ export default function Login() {
               {/* Submit button */}
               <button
                 type="submit"
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-medium py-2 rounded-lg transition-colors duration-200"
+                disabled={loading}
+                className="w-full bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-medium py-2 rounded-lg transition-colors duration-200"
               >
-                Se connecter
+                {loading ? 'Connexion...' : 'Se connecter'}
               </button>
+
+              {/* Divider */}
+              <div className="relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-gray-300"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-gray-500">ou</span>
+                </div>
+              </div>
+
+              {/* Google Login */}
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 text-center">
+                  Connexion avec Google
+                </label>
+                <div className="flex justify-center">
+                  <GoogleLogin
+                    onSuccess={handleGoogleLogin}
+                    onError={() => console.log('Login Failed')}
+                    text="signin_with"
+                    shape="rectangular"
+                    theme="outline"
+                    size="large"
+                    width="350"
+                  />
+                </div>
+              </div>
 
               {/* Demo credentials */}
               <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">

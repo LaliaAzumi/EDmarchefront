@@ -2,7 +2,10 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import VerifyEmail from './pages/VerifyEmail'
+import EmailVerified from './pages/EmailVerified'
 import CitizenDashboard from './pages/CitizenDashboard'
+import Profile from './pages/Profile'
 import Services from './pages/Services'
 import Appointments from './pages/Appointments'
 import AdminDashboard from './pages/AdminDashboard'
@@ -14,6 +17,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/verify-email" element={<VerifyEmail />} />
+        <Route path="/email-verified" element={<EmailVerified />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/citizen" element={<CitizenDashboard />} />
         <Route path="/services" element={<Services />} />
         <Route path="/appointments" element={<Appointments />} />

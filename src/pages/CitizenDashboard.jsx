@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Bell, User, Settings, LogOut, Clock, CheckCircle2, AlertCircle, MapPin } from 'lucide-react'
 import DashboardHeader from '../components/DashboardHeader'
@@ -7,7 +7,17 @@ import Footer from '../components/Footer'
 export default function CitizenDashboard() {
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState('overview')
-  const [userName] = useState('Adriana')
+  const [userName, setUserName] = useState('')
+
+  useEffect(() => {
+    const stored = localStorage.getItem('user')
+    if (stored) {
+      try {
+        const user = JSON.parse(stored)
+        setUserName(user.nom || 'Utilisateur')
+      } catch {}
+    }
+  }, [])
 
   const myRequests = [
     {

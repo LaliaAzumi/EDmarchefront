@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { Search, ChevronDown } from 'lucide-react'
+import { Search, ChevronDown, Map } from 'lucide-react'
 import { useState } from 'react'
 
 export default function Header() {
@@ -24,6 +24,7 @@ export default function Header() {
             <button onClick={() => navigate('/')} className="text-gray-700 hover:text-primary transition font-medium text-sm cursor-pointer">Accueil</button>
             <button onClick={() => navigate('/services')} className="text-gray-700 hover:text-primary transition font-medium text-sm cursor-pointer">Services</button>
             <button onClick={() => navigate('/appointments')} className="text-gray-700 hover:text-primary transition font-medium text-sm cursor-pointer">Rendez-vous</button>
+            <button onClick={() => navigate('/carte')} className="text-gray-700 hover:text-primary transition font-medium text-sm cursor-pointer flex items-center gap-1"><Map className="w-4 h-4" />Carte</button>
             <a href="#" className="text-gray-700 hover:text-primary transition font-medium text-sm">Centre d'aide</a>
             <a href="#" className="text-gray-700 hover:text-primary transition font-medium text-sm">À propos</a>
           </nav>
@@ -56,6 +57,7 @@ export default function Header() {
             <button onClick={() => navigate('/')} className="text-gray-700 hover:text-primary transition font-medium text-sm text-left cursor-pointer">Accueil</button>
             <button onClick={() => navigate('/services')} className="text-gray-700 hover:text-primary transition font-medium text-sm text-left cursor-pointer">Services</button>
             <button onClick={() => navigate('/appointments')} className="text-gray-700 hover:text-primary transition font-medium text-sm text-left cursor-pointer">Rendez-vous</button>
+            <button onClick={() => navigate('/carte')} className="text-gray-700 hover:text-primary transition font-medium text-sm text-left cursor-pointer flex items-center gap-1"><Map className="w-4 h-4" />Carte</button>
             <a href="#" className="text-gray-700 hover:text-primary transition font-medium text-sm">Centre d'aide</a>
             <a href="#" className="text-gray-700 hover:text-primary transition font-medium text-sm">À propos</a>
           </nav>

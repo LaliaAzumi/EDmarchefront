@@ -69,7 +69,14 @@ export default function Profile() {
 
       // Update localStorage user
       if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user))
+        const userData = { ...data.user }
+        if (data.citoyen) {
+          userData.prenom = data.citoyen.prenom || ''
+          userData.date_naissance = data.citoyen.date_naissance || ''
+          userData.cin = data.citoyen.cin || ''
+          userData.adresse = data.citoyen.adresse || ''
+        }
+        localStorage.setItem('user', JSON.stringify(userData))
       }
 
       setOriginalData(formData)
@@ -139,7 +146,7 @@ export default function Profile() {
         </div>
 
         {message && (
-          <div className={`p-3 rounded-lg mb-6 flex items-center gap-2 text-sm ${
+          <div className={`p-3 rounded-lg mb-6 text-sm flex items-center gap-2 ${
             message.includes('Erreur') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'
           }`}>
             {message.includes('Erreur') ? <AlertCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
@@ -147,129 +154,114 @@ export default function Profile() {
           </div>
         )}
 
-        <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-          {/* Avatar Section */}
-          <div className="bg-gradient-to-r from-teal-600 to-teal-700 px-6 py-8 text-center">
-            <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mx-auto mb-3 text-white text-2xl font-bold">
-              {(formData.prenom ? formData.prenom[0] : '') + (formData.nom ? formData.nom[0] : '')}
-            </div>
-            <h2 className="text-xl font-bold text-white">
-              {formData.prenom} {formData.nom}
-            </h2>
-            <p className="text-teal-100 text-sm mt-1">{formData.email}</p>
+        <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-6">
+          {/* Nom */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <User className="w-4 h-4" />
+              Nom
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="nom"
+                value={formData.nom}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{formData.nom || '—'}</p>
+            )}
           </div>
 
-          {/* Form Fields */}
-          <div className="p-6 space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nom */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  Nom
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="nom"
-                    value={formData.nom}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                  />
-                ) : (
-                  <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-900">{formData.nom || '—'}</p>
-                )}
-              </div>
+          {/* Prénom */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <User className="w-4 h-4" />
+              Prénom
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="prenom"
+                value={formData.prenom}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{formData.prenom || '—'}</p>
+            )}
+          </div>
 
-              {/* Prénom */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <User className="w-4 h-4 text-gray-400" />
-                  Prénom
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="prenom"
-                    value={formData.prenom}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                  />
-                ) : (
-                  <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-900">{formData.prenom || '—'}</p>
-                )}
-              </div>
+          {/* Email (lecture seule) */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Mail className="w-4 h-4" />
+              Email
+            </label>
+            <p className="text-gray-500 px-4 py-2 bg-gray-50 rounded-lg border border-dashed border-gray-200">
+              {formData.email}
+              <span className="text-xs text-gray-400 ml-2">(non modifiable)</span>
+            </p>
+          </div>
 
-              {/* Email */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
-                  Email
-                </label>
-                <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-500">{formData.email}</p>
-                <p className="text-xs text-gray-400 mt-1">L'email ne peut pas être modifié ici.</p>
-              </div>
+          {/* Date de naissance */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <Calendar className="w-4 h-4" />
+              Date de naissance
+            </label>
+            {isEditing ? (
+              <input
+                type="date"
+                name="date_naissance"
+                value={formData.date_naissance}
+                onChange={handleChange}
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{formData.date_naissance || '—'}</p>
+            )}
+          </div>
 
-              {/* Date de naissance */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
-                  Date de naissance
-                </label>
-                {isEditing ? (
-                  <input
-                    type="date"
-                    name="date_naissance"
-                    value={formData.date_naissance}
-                    onChange={handleChange}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                  />
-                ) : (
-                  <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-900">
-                    {formData.date_naissance ? new Date(formData.date_naissance).toLocaleDateString('fr-FR') : '—'}
-                  </p>
-                )}
-              </div>
+          {/* CIN */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <CreditCard className="w-4 h-4" />
+              CIN
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="cin"
+                value={formData.cin}
+                onChange={handleChange}
+                placeholder="Numéro CIN (optionnel)"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{formData.cin || '—'}</p>
+            )}
+          </div>
 
-              {/* CIN */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <CreditCard className="w-4 h-4 text-gray-400" />
-                  CIN <span className="text-gray-400 font-normal">(optionnel)</span>
-                </label>
-                {isEditing ? (
-                  <input
-                    type="text"
-                    name="cin"
-                    value={formData.cin}
-                    onChange={handleChange}
-                    placeholder="Numéro CIN"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                  />
-                ) : (
-                  <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-900">{formData.cin || '—'}</p>
-                )}
-              </div>
-
-              {/* Adresse */}
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  Adresse
-                </label>
-                {isEditing ? (
-                  <textarea
-                    name="adresse"
-                    value={formData.adresse}
-                    onChange={handleChange}
-                    rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition"
-                  />
-                ) : (
-                  <p className="px-4 py-2 bg-gray-50 rounded-lg text-gray-900">{formData.adresse || '—'}</p>
-                )}
-              </div>
-            </div>
+          {/* Adresse */}
+          <div>
+            <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+              <MapPin className="w-4 h-4" />
+              Adresse
+            </label>
+            {isEditing ? (
+              <input
+                type="text"
+                name="adresse"
+                value={formData.adresse}
+                onChange={handleChange}
+                placeholder="Votre adresse"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
+              />
+            ) : (
+              <p className="text-gray-900 px-4 py-2 bg-gray-50 rounded-lg">{formData.adresse || '—'}</p>
+            )}
           </div>
         </div>
       </div>

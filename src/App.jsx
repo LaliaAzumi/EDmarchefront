@@ -8,6 +8,7 @@ import CitizenDashboard from './pages/CitizenDashboard'
 import Profile from './pages/Profile'
 import Services from './pages/Services'
 import Appointments from './pages/Appointments'
+import Carte from './pages/Carte'
 import AdminDashboard from './pages/AdminDashboard'
 
 function App() {
@@ -19,10 +20,11 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/verify-email" element={<VerifyEmail />} />
         <Route path="/email-verified" element={<EmailVerified />} />
-        <Route path="/profile" element={<Profile />} />
         <Route path="/citizen" element={<CitizenDashboard />} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/services" element={<Services />} />
         <Route path="/appointments" element={<Appointments />} />
+        <Route path="/carte" element={<Carte />} />
         <Route path="/admin" element={<AdminDashboard />} />
       </Routes>
     </Router>
@@ -30,3 +32,4 @@ function App() {
 }
 
 export default App
+

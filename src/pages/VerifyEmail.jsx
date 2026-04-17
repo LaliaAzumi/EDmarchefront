@@ -32,13 +32,14 @@ export default function VerifyEmail() {
 
   const handleCheckVerified = async () => {
     setChecking(true)
+    setMessage('')
     try {
       const result = await authAPI.checkEmailVerified(email)
       if (result.verified) {
         localStorage.removeItem('pending_email')
         navigate('/login')
       } else {
-        setMessage('Votre email n\'est pas encore vérifié. Veuillez cliquer sur le lien dans l\'email.')
+        setMessage("Votre email n'est pas encore vérifié. Veuillez cliquer sur le lien dans l'email.")
       }
     } catch (err) {
       setMessage('Erreur lors de la vérification.')
@@ -82,7 +83,7 @@ export default function VerifyEmail() {
               disabled={checking}
               className="w-full py-3 bg-teal-600 hover:bg-teal-700 disabled:bg-teal-400 text-white font-semibold rounded-lg transition"
             >
-              {checking ? 'Vérification...' : 'J\'ai cliqué sur le lien'}
+              {checking ? 'Vérification...' : "J'ai cliqué sur le lien"}
             </button>
 
             <button
@@ -91,7 +92,7 @@ export default function VerifyEmail() {
               className="w-full py-3 bg-white border border-teal-600 text-teal-600 hover:bg-teal-50 disabled:opacity-50 font-semibold rounded-lg transition flex items-center justify-center gap-2"
             >
               <RefreshCw className={`w-4 h-4 ${resending ? 'animate-spin' : ''}`} />
-              {resending ? 'Envoi en cours...' : 'Renvoyer l\'email'}
+              {resending ? 'Envoi en cours...' : "Renvoyer l'email"}
             </button>
           </div>
 

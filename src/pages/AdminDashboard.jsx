@@ -17,15 +17,32 @@ export default function AdminDashboard() {
   ]
 
   const requestsData = [
-    { id: 1, name: 'Andre Rasoalaniaiavo', type: 'Carte d\'identité', status: 'En attente', date: '24 Avril 2024', agent: 'Thomas' },
-    { id: 2, name: 'Épovir Rakoto', type: 'Passeport', status: 'En attente', date: '24 Avril 2024', agent: 'Marc' },
-    { id: 3, name: 'Bema Andriathiana', type: 'Certificat de Residence', status: 'En attente', date: '24 Avril 2024', agent: 'Adriana' },
-    { id: 4, name: 'Sitraka Randriambelo', type: 'Acte de Naissance', status: 'En attente', date: '25 Avril 2024', agent: 'Thomas' },
-    { id: 5, name: 'Thomas Rakoto', type: 'Passeport', status: 'En attente', date: '28 Avril 2024', agent: 'Marc' },
-    { id: 6, name: 'Fernant Avotra', type: 'Permis de conduire', status: 'En attente', date: '23 Avril 2024', agent: 'Marc' },
-    { id: 7, name: 'Nelly Ravolavitra', type: 'Acte de Mariage', status: 'En attente', date: '27 Avril 2024', agent: 'Thomas' },
-    { id: 8, name: 'Soa Andrianary', type: 'Carte Grise', status: 'En attente', date: '25 Avril 2024', agent: 'Marc' }
+    { id: 1, name: 'Andre Rasoalaniaiavo', type: 'Carte d\'identité', status: 'En attente', date: '24 Avril 2024', agent: 'Thomas', estimatedArrival: '26 Avril 2024, 10:00' },
+    { id: 2, name: 'Épovir Rakoto', type: 'Passeport', status: 'En attente', date: '24 Avril 2024', agent: 'Marc', estimatedArrival: '29 Avril 2024, 14:00' },
+    { id: 3, name: 'Bema Andriathiana', type: 'Certificat de Residence', status: 'En attente', date: '24 Avril 2024', agent: 'Adriana', estimatedArrival: '25 Avril 2024, 16:00' },
+    { id: 4, name: 'Sitraka Randriambelo', type: 'Acte de Naissance', status: 'En attente', date: '25 Avril 2024', agent: 'Thomas', estimatedArrival: '26 Avril 2024, 09:00' },
+    { id: 5, name: 'Thomas Rakoto', type: 'Passeport', status: 'En attente', date: '28 Avril 2024', agent: 'Marc', estimatedArrival: '02 Mai 2024, 11:00' },
+    { id: 6, name: 'Fernant Avotra', type: 'Permis de conduire', status: 'En attente', date: '23 Avril 2024', agent: 'Marc', estimatedArrival: '30 Avril 2024, 15:00' },
+    { id: 7, name: 'Nelly Ravolavitra', type: 'Acte de Mariage', status: 'En attente', date: '27 Avril 2024', agent: 'Thomas', estimatedArrival: '03 Mai 2024, 10:30' },
+    { id: 8, name: 'Soa Andrianary', type: 'Carte Grise', status: 'En attente', date: '25 Avril 2024', agent: 'Marc', estimatedArrival: '02 Mai 2024, 09:00' }
   ]
+
+  // Calculate estimated arrival time based on request type
+  const calculateEstimatedArrival = (requestDate, type) => {
+    const processingDays = {
+      'Carte d\'identité': 2,
+      'Passeport': 5,
+      'Certificat de Residence': 1,
+      'Acte de Naissance': 1,
+      'Acte de Mariage': 3,
+      'Permis de conduire': 7,
+      'Carte Grise': 5
+    }
+    const days = processingDays[type] || 3
+    const arrival = new Date(requestDate)
+    arrival.setDate(arrival.getDate() + days)
+    return arrival.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+  }
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -157,6 +174,7 @@ export default function AdminDashboard() {
                       <th className="text-left py-3 px-4 font-semibold text-gray-700">Type</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-700">Statut</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-700">Date de demande</th>
+                      <th className="text-left py-3 px-4 font-semibold text-gray-700">Heure d'arrivée estimée</th>
                       <th className="text-left py-3 px-4 font-semibold text-gray-700">Agent</th>
                     </tr>
                   </thead>
@@ -178,6 +196,12 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="py-3 px-4 text-gray-600">{request.date}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center gap-2">
+                            <Clock className="w-4 h-4 text-teal-600" />
+                            <span className="text-gray-700 font-medium">{request.estimatedArrival}</span>
+                          </div>
+                        </td>
                         <td className="py-3 px-4 text-gray-600">{request.agent}</td>
                       </tr>
                     ))}

@@ -10,6 +10,7 @@ import Services from './pages/Services'
 import Appointments from './pages/Appointments'
 import Carte from './pages/Carte'
 import AdminDashboard from './pages/AdminDashboard'
+import AgentDemandes from './pages/AgentDemandes'
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
         <Route path="/appointments" element={<Appointments />} />
         <Route path="/carte" element={<Carte />} />
         <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/agent/demandes" element={<AgentDemandes />} />
       </Routes>
     </Router>
   )

@@ -219,6 +219,10 @@ export const citoyenAPI = {
   }),
 }
 
+export const demandesAPI = {
+  getDemandes: () => fetchWithAuth('/demandes/'),
+}
+
 // ===== GOOGLE OAUTH =====
 
 export const googleAuthAPI = {

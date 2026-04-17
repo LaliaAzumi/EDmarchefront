@@ -56,7 +56,7 @@ export default function DashboardHeader({ userType = 'citizen' }) {
             ) : (
               <>
                 <button onClick={() => navigate('/admin')} className="text-teal-600 border-b-2 border-teal-600 font-semibold text-sm pb-2 cursor-pointer">Tableau de bord</button>
-                <button onClick={() => navigate('/admin')} className="text-gray-700 hover:text-teal-600 transition font-medium text-sm cursor-pointer">Demandes</button>
+                <button onClick={() => navigate('/agent/demandes')} className="text-gray-700 hover:text-teal-600 transition font-medium text-sm cursor-pointer">Demandes</button>
                 <button onClick={() => navigate('/appointments')} className="text-gray-700 hover:text-teal-600 transition font-medium text-sm cursor-pointer">Rendez-vous</button>
               </>
             )}
